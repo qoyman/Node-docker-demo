@@ -21,16 +21,12 @@ jobs:
       run: docker run -d -p 3000:3000 --name node-app node-app-demo:latest
 
     - name: Test the endpoint
-      run: curl http://localhost:3000/
-
-    - name: Download with retries
       run: |
-            curl --retry 5 \
-                 --retry-all-errors \
-                 --retry-delay 3 \
-                 --fail \
-                 --location \
-                 --show-error \
-                 --output <output-file> \
-                 "<download-url>"
+            for i in {1..10}; do
+              curl --fail --retry 5 --retry-all-errors --retry-delay 3 \
+                http://localhost:3000/ && exit 0
+              sleep 3
+            done
+            docker logs node-app
+            exit 1
 
